@@ -1,7 +1,7 @@
 gistup
 ======
 
-CLI tool for uploading gists. Uses github OAuth2 token.
+CLI tool for uploading gists. Uses Github OAuth2 token.
 
 ```sh
 $ export GITHUB_TOKEN="tokenhere"
@@ -16,6 +16,6 @@ $ gistup -d "Some description of the gists" -f "file1.txt file2.txt" -p
 
 ```sh
 # Private upload
-$ gistup -d "Some description of the gists" -f "file1.txt file2.txt" -p
+$ gistup -d "Some description of the gists" -f "file1.txt file2.txt"
 ```
 
