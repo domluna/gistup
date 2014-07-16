@@ -18,6 +18,15 @@ $ gistup -d "Some description of the gists" -f "file1.txt file2.txt" -p
 # Private upload
 $ gistup -d "Some description of the gists" -f "file1.txt file2.txt"
 ```
+## Installing
 
-Binaries can be found under [release](https://github.com/domluna/gistup/releases)
+For go users
+
+```sh
+$ go get github.com/domluna/gistup
+```
+
+For everyone else
+
+Binaries can be found under [release](https://github.com/domluna/gistup/releases) for Windows, Linux and OSX.
 
