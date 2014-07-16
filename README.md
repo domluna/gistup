@@ -19,3 +19,5 @@ $ gistup -d "Some description of the gists" -f "file1.txt file2.txt" -p
 $ gistup -d "Some description of the gists" -f "file1.txt file2.txt"
 ```
 
+Binaries can be found under [release](https://github.com/domluna/gistup/releases)
+
