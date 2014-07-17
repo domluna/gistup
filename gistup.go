@@ -48,12 +48,17 @@ func (g *gistFiles) String() string {
 
 // util for error handling
 func exit(err error) {
-	fmt.Printf("ERROR: %s, ", err)
+	fmt.Printf("ERROR: %s\n", err)
 	os.Exit(1)
 }
 
 func main() {
 	flag.Parse()
+	if len(files) == 0 || desc == "" {
+		fmt.Printf("Missing description and/or files\n")
+		flag.Usage()
+		return
+	}
 	for _, f := range files {
 		bytes, err := ioutil.ReadFile(f)
 		if err != nil {
