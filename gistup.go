@@ -59,6 +59,13 @@ func main() {
 		flag.Usage()
 		return
 	}
+
+	token := os.Getenv("GITHUB_TOKEN")
+	if token == "" {
+		fmt.Printf("Set your GITHUB_TOKEN variable!\n")
+		return
+	}
+
 	for _, f := range files {
 		bytes, err := ioutil.ReadFile(f)
 		if err != nil {
@@ -72,7 +79,7 @@ func main() {
 		gists[github.GistFilename(f)] = gist
 	}
 	t := &oauth.Transport{
-		Token: &oauth.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
+		Token: &oauth.Token{AccessToken: token},
 	}
 	client := github.NewClient(t.Client())
 	gist := &github.Gist{
