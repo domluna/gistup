@@ -62,7 +62,7 @@ func main() {
 
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		fmt.Printf("Set your GITHUB_TOKEN variable!\n")
+		fmt.Printf("Export your GITHUB_TOKEN variable!\n")
 		return
 	}
 
@@ -91,5 +91,5 @@ func main() {
 	if err != nil {
 		exit(err)
 	}
-	fmt.Printf("Successfully uploaded Gist ... Public: %t Description: \"%s\"\n", *g.Public, *g.Description)
+	fmt.Printf("Successfully uploaded Gist ... \nPublic: %t\nDescription: \"%s\"\n", *g.Public, *g.Description)
 }
