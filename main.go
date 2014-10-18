@@ -1,4 +1,3 @@
-// CLI for quickly uploading gists.
 package main
 
 import (
@@ -46,7 +45,7 @@ func (g *gistFiles) String() string {
 	return fmt.Sprint(*g)
 }
 
-// util for error handling
+// error handling
 func exit(err error) {
 	fmt.Printf("ERROR: %s\n", err)
 	os.Exit(1)
@@ -62,8 +61,7 @@ func main() {
 
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		fmt.Printf("Export your GITHUB_TOKEN variable!\n")
-		return
+		exit(errors.New("Export your GITHUB_TOKEN variable"))
 	}
 
 	for _, f := range files {
@@ -91,5 +89,12 @@ func main() {
 	if err != nil {
 		exit(err)
 	}
-	fmt.Printf("Successfully uploaded Gist ... \nPublic: %t\nDescription: \"%s\"\n", *g.Public, *g.Description)
+
+	fmt.Printf("Sucessfully uploaded gists ...\n")
+	fmt.Printf("Description: %s\n", *g.Description)
+	fmt.Printf("Public: %t\n", *g.Public)
+	fmt.Printf("Files:\n")
+	for fn, _ := range g.Files {
+		fmt.Printf("\t%s\n", fn)
+	}
 }
