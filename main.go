@@ -1,100 +1,86 @@
 package main
 
 import (
-	"errors"
-	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
-	"strings"
+	"path/filepath"
 
-	"code.google.com/p/goauth2/oauth"
 	"github.com/google/go-github/github"
+	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 )
 
 var (
-	desc   = ""
-	public = false
-	files  gistFiles
-	gists  = make(map[github.GistFilename]github.GistFile)
+	files       = make(map[github.GistFilename]github.GistFile)
+	description string
+	token       string
+	secret      bool
 )
 
+var cmdGistup = &cobra.Command{
+	Use:   "gistup",
+	Short: "gistup uploads files to Github as gists",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			cmd.Help()
+			return
+		}
+		for _, f := range args {
+			data, err := ioutil.ReadFile(f)
+			if err != nil {
+				log.Fatalf("gistup: reading file (%v)", err)
+			}
+
+			gf := github.GistFile{
+				Content: github.String(string(data)),
+			}
+
+			name := filepath.Base(f)
+			files[github.GistFilename(name)] = gf
+		}
+
+		gist := &github.Gist{
+			Description: github.String(description),
+			Files:       files,
+			Public:      github.Bool(!secret),
+		}
+
+		oauthClient := oauth2.NewClient(oauth2.NoContext, &tokenSource{})
+		client := github.NewClient(oauthClient)
+
+		g, _, err := client.Gists.Create(gist)
+		if err != nil {
+			log.Fatalf("gistup: creating gist (%v)", err)
+		}
+		fmt.Println(*g.HTMLURL)
+	},
+}
+
+// need this to create a client
+type tokenSource struct{}
+
+func (t *tokenSource) Token() (*oauth2.Token, error) {
+	return &oauth2.Token{AccessToken: token}, nil
+}
+
 func init() {
-	flag.StringVar(&desc, "description", desc, "description of the gist")
-	flag.StringVar(&desc, "d", desc, "description of the gist")
-	flag.BoolVar(&public, "public", public, "whether the file is public or not, defaults to private")
-	flag.BoolVar(&public, "p", public, "whether the file is public or not, defaults to private")
-	flag.Var(&files, "files", "files required for gist, space separated")
-	flag.Var(&files, "f", "files required for gist, space separated")
-}
-
-type gistFiles []string
-
-func (g *gistFiles) Set(value string) error {
-	if len(*g) > 0 {
-		return errors.New("files flag already set")
-	}
-
-	for _, f := range strings.Split(value, " ") {
-		*g = append(*g, f)
-	}
-	return nil
-}
-
-func (g *gistFiles) String() string {
-	return fmt.Sprint(*g)
-}
-
-// error handling
-func exit(err error) {
-	fmt.Printf("ERROR: %s\n", err)
-	os.Exit(1)
+	cmdGistup.Flags().StringVarP(&description, "description", "d", "", "description of gist")
+	cmdGistup.Flags().StringVarP(&token, "token", "t", "", "use this github token")
+	cmdGistup.Flags().BoolVarP(&secret, "secret", "s", false, "gist set to secret")
 }
 
 func main() {
-	flag.Parse()
-	if len(files) == 0 || desc == "" {
-		fmt.Printf("Missing description and/or files\n")
-		flag.Usage()
-		return
-	}
-
-	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		exit(errors.New("Export your GITHUB_TOKEN variable"))
-	}
-
-	for _, f := range files {
-		bytes, err := ioutil.ReadFile(f)
+		// load it from ~/.github
+		path := filepath.Join(os.Getenv("HOME"), ".github")
+		data, err := ioutil.ReadFile(path)
 		if err != nil {
-			exit(err)
+			log.Fatalf("gistup: invalid token (%v)", err)
 		}
-		s := string(bytes)
-		gist := github.GistFile{
-			Content:  github.String(s),
-			Filename: github.String(f),
-		}
-		gists[github.GistFilename(f)] = gist
-	}
-	t := &oauth.Transport{
-		Token: &oauth.Token{AccessToken: token},
-	}
-	client := github.NewClient(t.Client())
-	gist := &github.Gist{
-		Description: &desc,
-		Files:       gists,
-		Public:      github.Bool(public),
-	}
-	g, _, err := client.Gists.Create(gist)
-	if err != nil {
-		exit(err)
+		token = string(data)
 	}
 
-	fmt.Printf("Sucessfully uploaded gists ...\n")
-	fmt.Printf("Description: %s\n", *g.Description)
-	fmt.Printf("Public: %t\n", *g.Public)
-	fmt.Printf("Files:\n")
-	for fn, _ := range g.Files {
-		fmt.Printf("\t%s\n", fn)
-	}
+	cmdGistup.Execute()
 }
