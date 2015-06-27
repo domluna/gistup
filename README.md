@@ -5,7 +5,7 @@ Simple CLI for uploading files as gists.
 
 ### Install
 
-```sh
+```
 $ go get github.com/domluna/gistup
 ```
 
@@ -13,13 +13,13 @@ $ go get github.com/domluna/gistup
 
 Public gist.
 
-```sh
+```
 $ gistup -d "Awesome gist" file1.txt file2.txt
 ```
 
 Secret Gist.
 
-```sh
+```
 $ gistup -d "secret upload" -s secret.txt
 ```
 
