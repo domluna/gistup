@@ -25,7 +25,7 @@ $ gistup -d "secret upload" -s secret.txt
 
 ### Help
 
-```sh
+```
 gistup uploads files to Github as gists
 
 Usage:
